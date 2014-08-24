@@ -1,3 +1,5 @@
+# the secret token is used by Rails to protect session variables
+
 # Be sure to restart your server when you modify this file.
 
 # Your secret key is used for verifying the integrity of signed cookies.
