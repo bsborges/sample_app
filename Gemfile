@@ -3,6 +3,8 @@ ruby '2.1.1'
 #ruby-gemset=rails_4_tutorial
 
 gem 'rails', '4.0.8'
+gem 'bootstrap-sass', '2.3.2.0'
+gem 'sprockets', '2.11.0'           # Ruby library for compiling and serving web assets
 
 group :development, :test do
   gem 'sqlite3', '1.3.8'
