@@ -21,6 +21,7 @@ group :test do
   gem 'selenium-webdriver', '2.35.1'
   gem 'capybara', '2.1.0'           # natural-language DSL for rspec
   gem 'libnotify', '0.8.0'          # guard: notifications add-on
+  gem 'factory_girl_rails', '4.2.0' # A library for setting up Ruby objects as test data
 end
 
 gem 'sass-rails', '4.0.1'
