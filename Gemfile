@@ -5,6 +5,8 @@ ruby '2.1.1'
 gem 'rails', '4.0.8'
 gem 'bootstrap-sass', '2.3.2.0'
 gem 'sprockets', '2.11.0'           # Ruby library for compiling and serving web assets
+gem 'bcrypt-ruby', '3.1.2'          # bcrypt() password hashing algorithm, allowing you to easily store a secure hash of your users' passwords
+# gem 'bcrypt-ruby', '~> 3.0.0'
 
 group :development, :test do
   gem 'sqlite3', '1.3.8'
@@ -36,3 +38,13 @@ group :production do
   gem 'pg', '0.15.1'                # PostgreSQL 
   gem 'rails_12factor', '0.0.2'
 end
+
+
+# TODO:
+# pry
+# gems "learn-rails"
+# gems "sample_app"
+# gems "coursera"
+# gem "analytics"
+# gem "mailing"
+# nokogiri
