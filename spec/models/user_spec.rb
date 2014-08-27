@@ -1,6 +1,8 @@
 require 'spec_helper'
 
 describe User do
+  
+  # TODO: we don’t test how long the “remember me” cookie lasts or whether it gets set at all
     
     before do
        @user = User.new(name: "Example User", email: "user@example.com",
@@ -15,6 +17,8 @@ describe User do
   it { should respond_to(:password_digest) }
   it { should respond_to(:password) }
   it { should respond_to(:password_confirmation) }
+  it { should respond_to(:remember_token) }
+  it { should respond_to(:authenticate) }
   
   it { should be_valid }
 
@@ -106,6 +110,14 @@ describe User do
   describe "with a password that's too short" do
     before { @user.password = @user.password_confirmation = "a" * 5 }
     it { should be_invalid }
+  end
+  
+  describe "remember token" do
+    before { @user.save }
+    # its method, which is like it,  applies the subsequent test to the given 
+    # attribute rather than the subject of the test
+    its(:remember_token) { should_not be_blank } 
+    # equivalent to: it { expect(@user.remember_token).not_to be_blank }
   end
   
 end

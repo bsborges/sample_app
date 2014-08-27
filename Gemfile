@@ -22,6 +22,8 @@ group :test do
   gem 'capybara', '2.1.0'           # natural-language DSL for rspec
   gem 'libnotify', '0.8.0'          # guard: notifications add-on
   gem 'factory_girl_rails', '4.2.0' # A library for setting up Ruby objects as test data
+  gem 'cucumber-rails', '1.4.0', :require => false            # behavior-driven development
+  gem 'database_cleaner', github: 'bmabey/database_cleaner'   # utility for cucumber
 end
 
 gem 'sass-rails', '4.0.1'
