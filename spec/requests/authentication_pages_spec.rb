@@ -15,16 +15,21 @@ describe "Authentication" do
     before { visit signin_path }
 
     describe "with invalid information" do
+      let(:user) { FactoryGirl.create(:user) }
       before { click_button "Sign in" }
 
       it { should have_title('Sign in') }
       #it { should have_selector('div.alert.alert-error') }
       it { should have_error_message('Invalid') } # from ./support/utilites.rb
       
+      it { should_not have_link('Profile',     href: user_path(user)) }
+      it { should_not have_link('Settings',    href: edit_user_path(user)) }
+      
+      
       describe "after visiting another page" do
         before { click_link "Home" }
         #it { should_not have_selector('div.alert.alert-error') }
-        it { should_not  have_error_message('Invalid') }
+        it { should_not  have_error_message('Invalid') }            # flash.now?
       end
     end
     
@@ -58,9 +63,10 @@ describe "Authentication" do
       describe "when attempting to visit a protected page" do
         before do
           visit edit_user_path(user)
-          fill_in "Email",    with: user.email
-          fill_in "Password", with: user.password
-          click_button "Sign in"
+          sign_in user
+          # fill_in "Email",    with: user.email
+          # fill_in "Password", with: user.password
+          # click_button "Sign in"
         end
 
         describe "after signing in" do
@@ -73,9 +79,10 @@ describe "Authentication" do
             before do
               click_link "Sign out"
               click_link "Sign in"
-              fill_in "Email",    with: user.email
-              fill_in "Password", with: user.password
-              click_button "Sign in"     
+              # fill_in "Email",    with: user.email
+              # fill_in "Password", with: user.password
+              # click_button "Sign in"    
+              sign_in user
             end
 
             it "should render the default (profile) page" do
@@ -112,7 +119,7 @@ describe "Authentication" do
       let(:user) { FactoryGirl.create(:user) }
       let(:wrong_user) { FactoryGirl.create(:user, email: "wrong@example.com") }
       before { sign_in user, no_capybara: true }
-      # This is necessary when using one of the HTTP request methods directly (get, post, patch, or delete)
+      # no_capybara: true => This is necessary when using one of the HTTP request methods directly (get, post, patch, or delete)
 
       describe "submitting a GET request to the Users#edit action" do
         before { get edit_user_path(wrong_user) }
@@ -137,8 +144,24 @@ describe "Authentication" do
       describe "submitting a DELETE request to the Users#destroy action" do
         before { delete user_path(user) }
         #specify { expect(response).to redirect_to(root_url) }
+        
         specify { response.should redirect_to(root_path) }
       end
     end
+    
+    # A test for protecting the destroy action. Admin cannot delete itself.
+    describe "as admin user" do
+      let(:admin) { FactoryGirl.create(:admin) }
+
+      before { sign_in admin, no_capybara: true }
+
+      describe "submitting a DELETE request to the Users#destroy action" do
+        before { delete user_path(admin) }
+        #specify { expect(response).to redirect_to(root_url) }
+        
+        specify { response.should redirect_to(root_path) }
+      end
+    end
+    
   end
 end

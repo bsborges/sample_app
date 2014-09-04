@@ -24,7 +24,11 @@ class UsersController < ApplicationController
   end
   
   def new
-    @user = User.new
+    if signed_in?
+      redirect_to root_url
+    else
+      @user = User.new
+    end
   end
   
   def show
@@ -59,10 +63,15 @@ class UsersController < ApplicationController
   end
   
   def destroy
-    User.find(params[:id]).destroy
-    flash[:success] = "User deleted."
-    #redirect_to users_url
-    redirect_to users_path # previous version
+    user = User.find(params[:id])
+    if !current_user?(user)
+      user.destroy
+      flash[:success] = "User deleted."
+      #redirect_to users_url
+      redirect_to users_path # previous version
+    else
+      redirect_to root_url # TODO when to use _path vs. _url
+    end
   end
   
   private
