@@ -1,0 +1,16 @@
+<% provide(:title, 'All users') %>
+<h1>All users</h1>
+
+<%= will_paginate %>
+
+<ul class="users">
+  <%= render @users %> <!-- equivalent to: @users.each do |user| render user end -->
+  <!-- Here we call render not on a string with the name of a partial, but rather
+  on a user variable of class User; in this context, Rails automatically looks
+  for a partial called _user.html.erb -->
+  <!-- Here Rails infers that @users is a list of User objects; moreover, when called
+  with a collection of users, Rails automatically iterates through them and renders
+  each one with the _user.html.erb partial -->
+</ul>
+
+<%= will_paginate %>

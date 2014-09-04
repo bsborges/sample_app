@@ -7,6 +7,12 @@ gem 'bootstrap-sass', '2.3.2.0'
 gem 'sprockets', '2.11.0'           # Ruby library for compiling and serving web assets
 gem 'bcrypt-ruby', '3.1.2'          # bcrypt() password hashing algorithm, allowing you to easily store a secure hash of your users' passwords
 # gem 'bcrypt-ruby', '~> 3.0.0'
+gem 'faker', '1.1.2'                # allow us to make sample users with semi-realistic names and email addresses
+gem 'will_paginate', '3.0.4'        # a collection of extensions for the database layer that enable paginated queries, and view helpers for popular frameworks that render pagination links
+gem 'bootstrap-will_paginate', '0.0.9' # configures will_paginate to use Bootstrap’s pagination styles
+
+
+gem 'do_by', github: 'andyw8/do_by'   # Automatically expiring TODO notes in Ruby
 
 group :development, :test do
   gem 'sqlite3', '1.3.8'
@@ -50,4 +56,6 @@ end
 # gems "coursera"
 # gem "analytics"
 # gem "mailing"
-# nokogiri
+# nokogiri?
+# Rails 4 by Obie Fernandez
+# RubyToolkit top

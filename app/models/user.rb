@@ -5,6 +5,8 @@ class User < ActiveRecord::Base
   end
   before_create :create_remember_token
   
+  # add attribute to the model: rails generate migration add_ATTRIBUTE_to_users attribute:type; eg. rails generate migration add_admin_to_users admin:boolean
+  
   # validations
   # http://api.rubyonrails.org/classes/ActiveModel/Validations/ClassMethods.html
   # http://api.rubyonrails.org/v4.0.0/classes/ActiveModel/Validations/HelperMethods.html#method-i-validates_confirmation_of
@@ -15,7 +17,13 @@ class User < ActiveRecord::Base
   validates :email, presence: true, format: { with: VALID_EMAIL_REGEX }, uniqueness: { case_sensitive: false }
   validates :password, length: { minimum: 6 }
   
-
+  
+  # TODO [20150101] activate user
+  # TODO [20150101] block user with 3 failed attempts + send email to reactivate
+  
+  # TODO [20150101] put salt in the password_digest (fixed size byte code)
+  # TODO [20131001] save email and name hashed
+  
   has_secure_password # presence validations for the password and its confirmation are automatically added by has_secure_password  
   # has_secure_password: we need to add password and password_confirmation attributes, require the presence of 
   # the password, require that they match, and add an authenticate method to compare a hashed password to the
@@ -33,14 +41,12 @@ class User < ActiveRecord::Base
     # SHA1 is less secure than Bcrypt, but in the present case it is more than 
     # sufficient because the token being hashed is already a 16-digit random 
     # string; the SHA1 hexdigest of such a string is essentially uncrackable
-    # TODO: use SHA3 -> https://github.com/phusion/digest-sha3-ruby
+    # TODO [20140601] use SHA3 -> https://github.com/phusion/digest-sha3-ruby
     Digest::SHA1.hexdigest(token.to_s)
   end
   
   
-  
-  # TODO: add salt to the password
-  
+  # TODO [20140601] add salt to the password
   
   private
   

@@ -1,8 +1,26 @@
 module SessionsHelper
+  
+  # session[...] The storage mechanism is the session facility provided by Rails,
+  # which you can think of as being like an instance of the cookies variable 
+  # from Section 8.2.1 that automatically expires upon browser close
+  
+  def create
+    user = User.find_by(email: params[:session][:email].downcase)
+    if user && user.authenticate(params[:session][:password])
+      sign_in user
+      redirect_back_or user
+    else
+      flash.now[:error] = 'Invalid email/password combination'
+      render 'new'
+    end
+  end
+  
+  
   def sign_in(user)
     remember_token = User.new_remember_token                                # create a new token
     
-    # TODO: create hash with cookie's name
+    # TODO 'create hash with cookie name', '2014-09-05'
+    
     # cookie.name = :remember_token 
     
     cookies.permanent[:remember_token] = remember_token                     # place the raw token in the browser cookies
@@ -11,14 +29,14 @@ module SessionsHelper
     user.update_attribute(:remember_token, User.digest(remember_token))     # save the hashed token to the database
     self.current_user = user                                                # set the current user equal to the given user
     
-    
     Rails.logger.debug cookies
     
-    
   end
+  
   def signed_in?
     !current_user.nil?
   end
+  
   # Ruby's syntax for assignment function
   def current_user=(user)
     @current_user = user
@@ -29,12 +47,26 @@ module SessionsHelper
     @current_user ||= User.find_by(remember_token: remember_token)
   end
   
+  def current_user?(user)
+    user == current_user
+  end
+  
   def sign_out
+    Rails.logger.debug "SessionsHelper sign_out"
     current_user.update_attribute(:remember_token, User.digest(User.new_remember_token))
+    session.delete(:return_to)      # need to delete last store_location/restore initial home page
     cookies.delete(:remember_token)
     self.current_user = nil
   end
   
+  def redirect_back_or(default)
+    redirect_to(session[:return_to] || default)
+    session.delete(:return_to)
+  end
+
+  def store_location
+    session[:return_to] = request.url if request.get?
+  end
   
   # Ruby's syntax for reading function
   # def current_user
