@@ -1,4 +1,7 @@
 class User < ActiveRecord::Base
+  has_many :microposts, dependent: :destroy # dependent ensures that a user’s microposts are destroyed along with the user.
+  # TODO dependent de-activates data but doesn't destroy it
+  
   before_save do
     self.email = email.downcase
     my_logger.info("Creating user with name #{self.name}")
@@ -22,6 +25,7 @@ class User < ActiveRecord::Base
   # TODO [20150101] block user with 3 failed attempts + send email to reactivate
   
   # TODO [20150101] put salt in the password_digest (fixed size byte code)
+  # TODO [20140601] add salt to the password
   # TODO [20131001] save email and name hashed
   
   has_secure_password # presence validations for the password and its confirmation are automatically added by has_secure_password  
@@ -45,8 +49,10 @@ class User < ActiveRecord::Base
     Digest::SHA1.hexdigest(token.to_s)
   end
   
-  
-  # TODO [20140601] add salt to the password
+  def feed
+    # This is preliminary. See "Following users" for the full implementation.
+    Micropost.where("user_id = ?", id) # is essentially equivalent to writing "microposts"
+  end
   
   private
   

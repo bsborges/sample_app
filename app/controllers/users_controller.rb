@@ -20,7 +20,7 @@ class UsersController < ApplicationController
   
   def index
     # TODO paginate - give option to paginate with 10, 20, 30, 50
-    @users = User.paginate(page: params[:page])
+    @users = User.paginate(page: params[:page]) # gem paginate automagically inserts page in the params hash
   end
   
   def new
@@ -32,8 +32,8 @@ class UsersController < ApplicationController
   end
   
   def show
-    @user = User.find(params[:id])
-    #@user = User.find_by(id: params[:id])
+    @user = User.find(params[:id])  # equivalent to: @user = User.find_by(id: params[:id])
+    @microposts = @user.microposts.paginate(page: params[:page])
   end
   
   def create
@@ -84,10 +84,10 @@ class UsersController < ApplicationController
     
     # Before filters
 
-    def signed_in_user
-      store_location
-      redirect_to signin_url, notice: "Please sign in." unless signed_in?
-    end
+    # def signed_in_user
+    #   store_location
+    #   redirect_to signin_url, notice: "Please sign in." unless signed_in?
+    # end
     
     def correct_user
       @user = User.find(params[:id])

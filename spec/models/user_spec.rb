@@ -22,6 +22,8 @@ describe User do
   it { should respond_to(:authenticate) }
   # Tests for an admin attribute
   it { should respond_to(:admin) }
+  it { should respond_to(:microposts) }
+  it { should respond_to(:feed) }
   
   # object is ?
   it { should be_valid }
@@ -134,4 +136,44 @@ describe User do
     # equivalent to: it { expect(@user.remember_token).not_to be_blank }
   end
   
+  # Testing the order of a user’s microposts.
+  describe "micropost associations" do
+
+    before { @user.save }
+    let!(:older_micropost) do       # let variables are lazy, meaning that they only spring into existence when referenced
+      FactoryGirl.create(:micropost, user: @user, created_at: 1.day.ago)
+    end
+    let!(:newer_micropost) do
+      FactoryGirl.create(:micropost, user: @user, created_at: 1.hour.ago)
+    end
+
+    it "should have the right microposts in the right order" do
+      expect(@user.microposts.to_a).to eq [newer_micropost, older_micropost]  # This should fail because by default the posts will be ordered by id
+    end
+    
+    # Testing that microposts are destroyed when users are.
+    it "should destroy associated microposts" do
+      microposts = @user.microposts.to_a # the call to to_a effectively makes a copy of the microposts
+      @user.destroy
+      expect(microposts).not_to be_empty # safety check to catch any errors should the to_a ever be accidentally removed
+      microposts.each do |micropost|
+        expect(Micropost.where(id: micropost.id)).to be_empty
+        # equivalent to:
+        # expect do
+        #   Micropost.find(micropost) # when empty find() raises an exception while where() returns an empty object
+        # end.to raise_error(ActiveRecord::RecordNotFound)
+      end
+    end
+    
+    describe "status" do
+      let(:unfollowed_post) do
+        FactoryGirl.create(:micropost, user: FactoryGirl.create(:user))
+      end
+
+      its(:feed) { should include(newer_micropost) }
+      its(:feed) { should include(older_micropost) }
+      its(:feed) { should_not include(unfollowed_post) }
+    end
+    
+  end
 end

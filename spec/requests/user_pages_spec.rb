@@ -72,10 +72,25 @@ describe "User pages" do
   
   describe "profile page" do
     let(:user) { FactoryGirl.create(:user) }
+    let!(:m1) { FactoryGirl.create(:micropost, user: user, content: "Foo") }
+    let!(:m2) { FactoryGirl.create(:micropost, user: user, content: "Bar") }
+    # we want the association to exist immediately so that the posts appear on 
+    # the user show page. To accomplish this, we use the let! variant
+    
     before { visit user_path(user) }
     
     it { should have_content(user.name) }
     it { should have_title(user.name) }
+    
+    describe "microposts" do
+      it { should have_content(m1.content) }
+      it { should have_content(m2.content) }
+      it { should have_content(user.microposts.count) }
+      
+      # In the unlikely event that finding the count is still a bottleneck in 
+      # your application, you can make it even faster with a counter cache.
+      # url: http://railscasts.com/episodes/23-counter-cache-column
+    end
   end
   
   describe "signup" do
