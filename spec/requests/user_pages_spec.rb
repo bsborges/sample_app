@@ -92,6 +92,30 @@ describe "User pages" do
       # url: http://railscasts.com/episodes/23-counter-cache-column
     end
     
+    # Testing the following/follower statistics on the Profile page.
+    describe "stats" do
+      before do
+        visit user_path(user)
+      end
+      
+      it "should render the user's feed" do
+        user.feed.each do |item|
+          expect(page).to have_selector("li##{item.id}", text: item.content)
+        end
+      end
+
+      describe "follower/following counts" do
+        let(:other_user) { FactoryGirl.create(:user) }
+        before do
+          other_user.follow!(user)
+          visit user_path(user)
+        end
+
+        it { should have_link("0 following", href: following_user_path(user)) }
+        it { should have_link("1 followers", href: followers_user_path(user)) }
+      end
+    end
+    
     # Tests for the Follow/Unfollow button.
     describe "follow/unfollow buttons" do
       let(:other_user) { FactoryGirl.create(:user) }

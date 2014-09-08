@@ -213,6 +213,27 @@ describe User do
       it { should_not be_following(other_user) } # uses following? boolean method
       its(:followed_users) { should_not include(other_user) }
     end
+    
+    # tests for destroying relationships associated with a given user
+    describe "should destroy associated relationships" do
+      it "of followed users" do
+        relationships = @user.followed_users.to_a
+        @user.destroy
+        expect(relationships).not_to be_empty
+        relationships.each do |relationship|
+          expect(Relationship.where(id: relationship.id)).to be_empty
+        end
+      end
+      it "of followers" do
+        relationships = other_user.followers.to_a
+        other_user.destroy
+        expect(relationships).not_to be_empty
+        relationships.each do |relationship|
+          expect(Relationship.where(id: relationship.id)).to be_empty
+        end
+      end
+    end
+    
   end
   
 end
