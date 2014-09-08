@@ -4,15 +4,14 @@ describe User do
   
   # TODO: we don’t test how long the “remember me” cookie lasts or whether it gets set at all
     
-    before do
-       @user = User.new(name: "Example User", email: "user@example.com",
+  before do
+     @user = User.new(name: "Example User", email: "user@example.com",
                         password: "foobar", password_confirmation: "foobar")
-    end
+  end
   
-
   subject { @user }
 
-  # Tests for the presence of the attribute
+  # Tests for the presence of attributes and methods
   it { should respond_to(:name) }
   it { should respond_to(:email) }
   it { should respond_to(:password_digest) }
@@ -20,10 +19,16 @@ describe User do
   it { should respond_to(:password_confirmation) }
   it { should respond_to(:remember_token) }
   it { should respond_to(:authenticate) }
-  # Tests for an admin attribute
   it { should respond_to(:admin) }
   it { should respond_to(:microposts) }
   it { should respond_to(:feed) }
+  it { should respond_to(:relationships) }
+  it { should respond_to(:followed_users) }
+  it { should respond_to(:following?) }
+  it { should respond_to(:follow!) }
+  it { should respond_to(:unfollow!) }
+  it { should respond_to(:reverse_relationships) }
+  it { should respond_to(:followers) }
   
   # object is ?
   it { should be_valid }
@@ -165,15 +170,49 @@ describe User do
       end
     end
     
+    
+    # The key is to check all three requirements for the feed: microposts for followed users 
+    # and the user itself should be included in the feed, but a post from an unfollowed user
+    # should not be included.
     describe "status" do
       let(:unfollowed_post) do
         FactoryGirl.create(:micropost, user: FactoryGirl.create(:user))
+      end
+      let(:followed_user) { FactoryGirl.create(:user) }
+      
+      before do
+        @user.follow!(followed_user)
+        3.times { followed_user.microposts.create!(content: "Lorem ipsum") }
       end
 
       its(:feed) { should include(newer_micropost) }
       its(:feed) { should include(older_micropost) }
       its(:feed) { should_not include(unfollowed_post) }
+      its(:feed) do
+        followed_user.microposts.each do |micropost|
+          should include(micropost)
+        end
+      end
     end
-    
   end
+  
+  # following | relationship tests
+  describe "following" do
+    let(:other_user) { FactoryGirl.create(:user) }
+    before do
+      @user.save
+      @user.follow!(other_user)
+    end
+
+    it { should be_following(other_user) }
+    its(:followed_users) { should include(other_user) }
+    
+    describe "and unfollowing" do
+      before { @user.unfollow!(other_user) }
+
+      it { should_not be_following(other_user) } # uses following? boolean method
+      its(:followed_users) { should_not include(other_user) }
+    end
+  end
+  
 end

@@ -1,6 +1,32 @@
 class User < ActiveRecord::Base
   has_many :microposts, dependent: :destroy # dependent ensures that a user’s microposts are destroyed along with the user.
-  # TODO dependent de-activates data but doesn't destroy it
+  # TODO dependent should de-activate data instead of destroying it
+  
+  # when the foreign key for a User model object is user_id, Rails infers the association automatically: by default, Rails
+  # expects a foreign key of the form <class>_id, where <class> is the lower-case version of the class name.
+  # In the present case, although we are still dealing with users, they are now identified with the foreign key follower_id, 
+  # so we have to tell that to Rails
+  has_many :relationships, foreign_key: "follower_id", dependent: :destroy
+  
+  # By default, in a has_many through association Rails looks for a foreign key 
+  # corresponding to the singular version of the association; in other words, code like
+  # has_many :followeds, through: :relationships
+  # would assemble an array using the followed_id in the relationships table. 
+  # But, user.followeds is rather awkward; far more natural is to use “followed users” 
+  # as a plural of “followed”, and write instead user.followed_users for the array
+  # of followed users. Naturally, Rails allows us to override the default, in this case
+  # using the :source parameter, which explicitly tells Rails that the source of
+  # the followed_users array is the set of followed ids.
+  has_many :followed_users, through: :relationships, source: :followed
+  
+  # Note that we actually have to include the class name for this association
+  # because otherwise Rails would look for a ReverseRelationship class, which doesn’t exist
+  has_many :reverse_relationships, foreign_key: "followed_id",
+                                   class_name:  "Relationship",
+                                   dependent:   :destroy
+  has_many :followers, through: :reverse_relationships, source: :follower
+  
+  
   
   before_save do
     self.email = email.downcase
@@ -51,7 +77,25 @@ class User < ActiveRecord::Base
   
   def feed
     # This is preliminary. See "Following users" for the full implementation.
-    Micropost.where("user_id = ?", id) # is essentially equivalent to writing "microposts"
+    # Micropost.where("user_id = ?", id) # is essentially equivalent to writing "microposts"
+    Micropost.from_users_followed_by(self)
+  end
+  
+  def following?(other_user)
+    relationships.find_by(followed_id: other_user.id) # true: object; false: nil
+    # we have omitted the user itself, but it's equivalent to:
+    # self.relationships.find_by(followed_id: other_user.id)
+    # Whether to include the explicit self is largely a matter of taste.
+  end
+
+  def follow!(other_user)
+    relationships.create!(followed_id: other_user.id) # new && save or raise exception
+    # equivalent to:
+    # self.relationships.create!(followed_id: other_user.id)
+  end
+  
+  def unfollow!(other_user)
+    relationships.find_by(followed_id: other_user.id).destroy
   end
   
   private

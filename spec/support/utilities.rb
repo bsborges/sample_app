@@ -13,6 +13,14 @@ def fill_in_new_user_test()
   fill_in "Confirm Password", with: "foobar"
 end
 
+
+# As noted in the comment line, filling in the form doesn’t work when not using Capybara, 
+# so to cover this case we allow the user to pass the option no_capybara: true to 
+# override the default signin method and manipulate the cookies directly. This is
+# necessary when using one of the HTTP request methods directly (get, post, patch, or delete), 
+# as we’ll see in Listing 9.45. (Note that the test cookies object isn’t a perfect
+# simulation of the real cookies object; in particular, the cookies.permanent method 
+# seen in Listing 8.19 doesn’t work inside tests.)
 def sign_in(user, options={})
   if options[:no_capybara]
     # Sign in when not using Capybara.

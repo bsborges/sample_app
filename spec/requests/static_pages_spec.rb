@@ -33,6 +33,37 @@ describe "Static pages" do
           expect(page).to have_selector("li##{item.id}", text: item.content)
         end
       end
+      
+      # Testing the following/follower statistics on the Home page.
+      describe "follower/following counts" do
+        let(:other_user) { FactoryGirl.create(:user) }
+        before do
+          other_user.follow!(user)
+          visit root_path
+        end
+
+        it { should have_link("0 following", href: following_user_path(user)) }
+        it { should have_link("1 followers", href: followers_user_path(user)) }
+      end
+      
+      # tests for the sidebar micropost counts (including proper pluralization)
+      it { should have_selector('section h1', text: user.name) }
+    #  it { pluralize(1, "micropost").should == "1 micropost" }
+     # it { pluralize(0, "micropost").should == "0 microposts" }
+      it "should show the total feeds" do
+        # expect(page).to have_content("micropost".pluralize(user.feed.count))
+        expect(page).to have_selector("section span", text: "micropost".pluralize(user.feed.count))
+      end
+      
+      describe "micropost pagination" do
+        
+        it "should paginate the feed" do
+          30.times { FactoryGirl.create(:micropost, user: user, content: "Consectetur adipiscing elit") }
+          visit root_path
+          page.should have_selector("div.pagination")
+        end
+      end
+      
     end
     
   end

@@ -30,6 +30,21 @@ describe "Micropost pages" do
         before { click_button "Post" }
         it { should have_content('error') }
       end
+      
+      # test to make sure delete links do not appear for microposts not created by the current user
+      # TODO delete micropost should be an authorization issue and not a micropost issue -> authentication_pages_spec.rb
+      describe "micropost destruction" do
+        let!(:micropost) { FactoryGirl.create(:micropost, user: user) }
+        let(:another_user) { FactoryGirl.create(:user) }
+        before do
+          sign_in another_user
+          visit user_path(user)
+        end
+        
+        it "should not have delete link of other users' microposts" do
+          expect(page).to_not have_link('delete')
+        end
+      end
     end
 
     describe "with valid information" do
